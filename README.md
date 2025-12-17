@@ -10,11 +10,11 @@ helm dependency update ./
 ```
 - Then install the helm chart with devProfile=true to make sure that Kafka and Apicurio get set up in the cluster:
 ```script
-helm install sbomer-release ./ --set global.includeKafka=true --set global.includeApicurio=true --set global.includeApiGateway=true
+helm install sbomer-release ./ --set global.includeKafka=true --set global.includeApicurio=true --set global.includeApiGateway=true -n sbomer --create-namespace
 ```
 - Then once all the pods are running, port-forward the api gateway:
 ```script
-kubectl port-forward svc/sbomer-release-gateway 8080:8080 (leave open in terminal)
+kubectl port-forward svc/sbomer-release-gateway 8080:8080 -n sbomer (leave open in terminal)
 ```
 - We can now go into the sbom-service API to trigger a generation:
 ```script
