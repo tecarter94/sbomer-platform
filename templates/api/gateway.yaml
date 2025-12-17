@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: nginx:alpine
+          image: nginxinc/nginx-unprivileged:alpine
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -42,8 +42,16 @@ spec:
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
               readOnly: true
+            - name: cache
+              mountPath: /var/cache/nginx
+            - name: run
+              mountPath: /var/run
       volumes:
         - name: config
           configMap:
             name: {{ .Release.Name }}-gateway-config
+        - name: cache
+          emptyDir: {}
+        - name: run
+          emptyDir: {}
 {{- end }}
