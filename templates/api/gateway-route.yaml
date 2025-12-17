@@ -1,0 +1,23 @@
+{{- if and .Values.global.includeApiGateway .Values.infra.gateway.route.enabled }}
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: {{ .Release.Name }}-gateway-route
+  labels:
+    app: sbomer-gateway
+    release: {{ .Release.Name }}
+  annotations:
+    shard: internal
+spec:
+  host: {{ .Values.infra.gateway.route.host }}
+  to:
+    kind: Service
+    name: {{ .Release.Name }}-gateway
+    weight: 100
+  wildcardPolicy: None
+  port:
+    targetPort: http
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+{{ end }}

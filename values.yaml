@@ -12,6 +12,10 @@ infra:
     storageClass: "standard"
   apicurio:
     image: quay.io/apicurio/apicurio-registry:latest
+  gateway:
+    route:
+      enabled: false
+      host: ""
 
 # --- Override Child Charts ---
 # Child components are by default looking at the Kafka and Apicurio instances set up by include flags above. 
