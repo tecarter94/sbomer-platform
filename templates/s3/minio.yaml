@@ -1,0 +1,58 @@
+{{- if .Values.global.includeS3 }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-minio
+  labels:
+    app: minio
+    release: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: minio
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: minio
+    spec:
+      containers:
+        - name: minio
+          image: {{ .Values.infra.minio.image }}
+          args:
+            - server
+            - /data
+            - --console-address
+            - :9001
+          ports:
+            - containerPort: 9000
+              name: api
+            - containerPort: 9001
+              name: console
+          env:
+            - name: MINIO_ROOT_USER
+              value: {{ .Values.infra.minio.rootUser | quote }}
+            - name: MINIO_ROOT_PASSWORD
+              value: {{ .Values.infra.minio.rootPassword | quote }}
+      volumes:
+        - name: data
+          emptyDir: {} # Ephemeral storage for easy local setup
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  labels:
+    app.kubernetes.io/name: minio
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.infra.minio.service.apiPort }}
+      targetPort: 9000
+      name: api
+    - port: {{ .Values.infra.minio.service.consolePort }}
+      targetPort: 9001
+      name: console
+  selector:
+    app.kubernetes.io/name: minio
+{{- end }}

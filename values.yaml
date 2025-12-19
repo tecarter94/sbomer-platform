@@ -1,21 +1,49 @@
 # Global settings for the platform
 global:
-  # Set this to 'true' to deploy Kafka/Apicurio inside this chart
+  # Include basic infrastructure setup (mainly for local development)
   includeKafka: true
   includeApicurio: true
   includeApiGateway: true
+  includeStatusDb: true
+  includeS3: true
 
 # Configuration for the internal Dev infrastructure
 infra:
+  # KAFKA CONFIG
   kafka:
     image: quay.io/strimzi/kafka:latest-kafka-3.7.0
     storageClass: "standard"
+  # APICURIO CONFIG
   apicurio:
     image: quay.io/apicurio/apicurio-registry:latest
   gateway:
     route:
       enabled: false
       host: ""
+  # POSTGRESQL CONFIG (Status DB)
+  statusDb:
+    image: quay.io/fedora/postgresql-16:latest
+    env:
+      database: sbomer_status
+      user: sbomer
+      password: sbomer_password
+    service:
+      port: 5432
+    storage:
+      size: 1Gi
+      # For local dev no persistence needed
+      persistenceEnabled: false 
+  # MINIO CONFIG (S3)
+  minio:
+    image: quay.io/minio/minio:latest
+    rootUser: minioadmin
+    rootPassword: minioadmin
+    service:
+      apiPort: 9000
+      consolePort: 9001
+    storage:
+      size: 5Gi
+      persistenceEnabled: false
 
 # --- Override Child Charts ---
 # Child components are by default looking at the Kafka and Apicurio instances set up by include flags above. 

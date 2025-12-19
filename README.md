@@ -10,7 +10,7 @@ helm dependency update ./
 ```
 - Then install the helm chart with devProfile=true to make sure that Kafka and Apicurio get set up in the cluster:
 ```script
-helm install sbomer-release ./ --set global.includeKafka=true --set global.includeApicurio=true --set global.includeApiGateway=true -n sbomer --create-namespace
+helm install sbomer-release ./ -n sbomer-test --create-namespace
 ```
 - Then once all the pods are running, port-forward the api gateway:
 ```script
