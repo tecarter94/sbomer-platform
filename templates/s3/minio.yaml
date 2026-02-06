@@ -31,9 +31,15 @@ spec:
               name: console
           env:
             - name: MINIO_ROOT_USER
-              value: {{ .Values.infra.minio.rootUser | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-minio-secret
+                  key: access-key-id
             - name: MINIO_ROOT_PASSWORD
-              value: {{ .Values.infra.minio.rootPassword | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-minio-secret
+                  key: secret-access-key
       volumes:
         - name: data
           emptyDir: {} # Ephemeral storage for easy local setup
@@ -77,18 +83,29 @@ spec:
       containers:
         - name: minio-setup
           image: quay.io/minio/mc:latest
+          env:
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-minio-secret
+                  key: access-key-id
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-minio-secret
+                  key: secret-access-key
           command:
             - /bin/sh
             - -c
             - |
               # Wait for MinIO to be ready
-              until mc alias set myminio http://{{ .Release.Name }}-minio:9000 {{ .Values.infra.minio.rootUser }} {{ .Values.infra.minio.rootPassword }}; do
+              until mc alias set myminio http://{{ .Release.Name }}-minio:9000 $MINIO_ACCESS_KEY $MINIO_SECRET_KEY; do
                 echo "Waiting for MinIO to be ready..."
                 sleep 2
               done
 
               # Create bucket if it doesn't exist
-              mc mb myminio/sboms --ignore-existing
+              mc mb myminio/{{ .Values.infra.minio.bucket }} --ignore-existing
 
               echo "MinIO setup complete"
 {{- end }}
